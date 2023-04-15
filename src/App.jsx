@@ -6,13 +6,13 @@ const engine = new Worker(process.env.PUBLIC_URL + "/stockfish.js");
 
 const initBoardState = converters
     .fen2array("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
-    .map((row, rank) =>
+    .map((row, rowNum) =>
         row.map(
-            (letter, file) =>
+            (letter, colNum) =>
                 letter && {
                     letter,
-                    file,
-                    rank,
+                    file: colNum,
+                    rank: 7 - rowNum, // reversed
                 }
         )
     )
@@ -96,6 +96,23 @@ function App() {
         runAsync();
     }, []);
 
+    const movePiece = (fromRank, fromFile, toRank, toFile) => {
+        console.log(fromRank, fromFile, toRank, toFile);
+        setBoardState((curr) => {
+            const stateCopy = [...curr];
+            const pieceIndex = stateCopy.findIndex(
+                (elt) => elt.file === fromFile && elt.rank === fromRank
+            );
+            console.log("Moving ", stateCopy[pieceIndex]);
+            stateCopy[pieceIndex] = {
+                ...stateCopy[pieceIndex],
+                rank: toRank,
+                file: toFile,
+            };
+            return stateCopy;
+        });
+    };
+
     return (
         <div className={styles.main}>
             <div className={styles.piecesContainer}>
@@ -105,6 +122,9 @@ function App() {
                         rank={rank}
                         file={file}
                         key={rank + "-" + file}
+                        moveSelf={(toRank, toFile) =>
+                            movePiece(rank, file, toRank, toFile)
+                        }
                     />
                 ))}
             </div>
