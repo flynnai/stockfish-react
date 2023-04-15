@@ -1,0 +1,11 @@
+.main {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    .piecesContainer {
+        width: 100%;
+        max-width: 100vh;
+        aspect-ratio: 1/1;
+        position: relative;
+    }
+}

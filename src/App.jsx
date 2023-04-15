@@ -1,10 +1,28 @@
+import { converters } from "fen-reader";
 import { useEffect, useRef, useState } from "react";
-import "./App.css";
+import styles from "./App.module.scss";
+import ChessPiece from "./ChessPiece";
 const engine = new Worker(process.env.PUBLIC_URL + "/stockfish.js");
 
+const initBoardState = converters
+    .fen2array("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+    .map((row, rank) =>
+        row.map(
+            (letter, file) =>
+                letter && {
+                    letter,
+                    file,
+                    rank,
+                }
+        )
+    )
+    .flat()
+    .filter(Boolean);
+
 function App() {
-    const [output, setOutput] = useState("");
+    const [boardState, setBoardState] = useState(initBoardState);
     const hasRunRef = useRef(false);
+    console.log("State", boardState);
 
     const blockForMessage = () =>
         new Promise((resolve) => {
@@ -78,7 +96,20 @@ function App() {
         runAsync();
     }, []);
 
-    return <div>{output}</div>;
+    return (
+        <div className={styles.main}>
+            <div className={styles.piecesContainer}>
+                {boardState.map(({ letter, rank, file }) => (
+                    <ChessPiece
+                        pieceLetter={letter}
+                        rank={rank}
+                        file={file}
+                        key={rank + "-" + file}
+                    />
+                ))}
+            </div>
+        </div>
+    );
 }
 
 export default App;
